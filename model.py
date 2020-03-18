@@ -33,7 +33,7 @@ class FFTSR:
     def model(self):
         # x = None
         f1,self.spatial_c1,self.spectral_c1 = self.fft_conv_pure_t(self.image_matrix,filters=5,width=256,height=256,stride=1, name='conv1')
-        # f2,self.spatial_c2,self.spectral_c2 = self.fft_conv_pure(f1,filters=5,width=256,height=256)
+        f2,self.spatial_c2,self.spectral_c2 = self.fft_conv_pure_t(f1,filters=5,width=256,height=256,stride=1, name='conv1')
 
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         # f_ = self.spectral_c1 +self.spectral_c2
@@ -79,7 +79,7 @@ class FFTSR:
     def fft_conv_pure_t(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
         # This function applies the convolutional filter, which is stored in the spectral domain, as a element-wise
         # multiplication between the filter and the image (which has been transformed to the spectral domain)
-
+        source = tf.reshape(source,shape=[-1,256,256,1])
         _, input_height, input_width, channels = source.get_shape().as_list()
 
         with tf.variable_scope(name, reuse=tf.AUTO_REUSE):
