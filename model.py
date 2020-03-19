@@ -32,17 +32,21 @@ class FFTSR:
 
     def model(self):
         # x = None
-        source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
+        self.source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
         # print('source_fft',source_fft)
-        self.f1,self.spectral_c1 = self.fft_conv_pure(source_fft,filters=5,width=256,height=256,stride=1, name='conv1')
+        self.f1,self.spectral_c1 = self.fft_conv_pure(self.source_fft,filters=5,width=256,height=256,stride=1, name='conv1')
         # f1_smooth,self.spatial_s1,self.spectral_s1 = self.fft_conv(self.spectral_c1,filters=5,width=5,height=5,stride=1, name='f1_smooth')
 
         self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
+        # self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
+        # self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
+
         # f2_smooth,self.spatial_s2,self.spectral_s2 = self.fft_conv(f2,filters=5,width=5,height=5,stride=1, name='f2_smooth')
 
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
-        f_ = tf.real(tf.ifft2d(self.f1))
+        f_ = self.f1+self.f2
+        f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         # print('__debug__spatial_c1',self.spectral_c1)
 
@@ -191,8 +195,8 @@ class FFTSR:
             _,x = self.sess.run([self.train_op,self.loss],feed_dict={self.images: lr_img, self.label:hr_img})
 
 
-            print(x)
-        w = self.sess.run([self.f1],feed_dict={self.images: lr_img, self.label:hr_img})
+        print(x)
+        w = self.sess.run([self.source_fft],feed_dict={self.images: lr_img, self.label:hr_img})
         w =np.squeeze(w)
         w = w /(1e3*1e-5)
         print(w)
