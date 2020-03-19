@@ -32,12 +32,12 @@ class FFTSR:
 
     def model(self):
         # x = None
-        # source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
+        source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
         # print('source_fft',source_fft)
-        self.f1,self.spectral_c1 = self.fft_conv_pure(self.image_matrix,filters=5,width=256,height=256,stride=1, name='conv1')
+        self.f1,self.spectral_c1 = self.fft_conv_pure(source_fft,filters=5,width=256,height=256,stride=1, name='conv1')
         # f1_smooth,self.spatial_s1,self.spectral_s1 = self.fft_conv(self.spectral_c1,filters=5,width=5,height=5,stride=1, name='f1_smooth')
 
-        # f2,self.spatial_c2,self.spectral_c2 = self.fft_conv_pure(f1,filters=5,width=256,height=256,stride=1, name='conv2')
+        self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
         # f2_smooth,self.spatial_s2,self.spectral_s2 = self.fft_conv(f2,filters=5,width=5,height=5,stride=1, name='f2_smooth')
 
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
@@ -52,7 +52,7 @@ class FFTSR:
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
         # This function applies the convolutional filter, which is stored in the spectral domain, as a element-wise
         # multiplication between the filter and the image (which has been transformed to the spectral domain)
-
+        source = tf.reshape(source,shape=[-1,256,256,1])
         _, input_height, input_width, channels = source.get_shape().as_list()
 
         with tf.variable_scope(name, reuse=tf.AUTO_REUSE):
@@ -76,10 +76,10 @@ class FFTSR:
 
         # Prepare the source tensor for FFT (1,256,256,1)
         source = tf.transpose(source, [0, 3, 1, 2])  # batch, channel, height, width (1,1,256,256)
-        source_fft = tf.fft2d(tf.complex(source, 0.0 * source))
+        # source_fft = tf.fft2d(tf.complex(source, 0.0 * source))
 
         # Prepare the FFTd input tensor for element-wise multiplication with filter
-        source_fft = tf.expand_dims(source_fft, 2)  # batch, channels, filters, height, width
+        source_fft = tf.expand_dims(source, 2)  # batch, channels, filters, height, width
         source_fft = tf.tile(source_fft, [1, 1, filters, 1, 1]) # (1,1,5,256,256)
 
         # Shift, then pad the filter for element-wise multiplication, then unshift
@@ -192,15 +192,15 @@ class FFTSR:
 
 
             print(x)
-            w = self.sess.run([self.f1],feed_dict={self.images: lr_img, self.label:hr_img})
-            w =np.squeeze(w)
-            w = w /(1e3*1e-5)
-            print(w)
-            imshow_spectrum(w)
+        w = self.sess.run([self.f1],feed_dict={self.images: lr_img, self.label:hr_img})
+        w =np.squeeze(w)
+        w = w /(1e3*1e-5)
+        print(w)
+        imshow_spectrum(w)
         #
-        # result = self.pred.eval({self.images: lr_img})
-        # result = np.squeeze(result)
-        # result = result*255/(1e3*1e-5)
-        # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-        # imshow(result)
-        # print(result)
+        result = self.pred.eval({self.images: lr_img})
+        result = np.squeeze(result)
+        result = result*255/(1e3*1e-5)
+        result = np.clip(result, 0.0, 255.0).astype(np.uint8)
+        imshow(result)
+        print(result)
