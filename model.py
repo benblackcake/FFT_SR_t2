@@ -27,9 +27,12 @@ class FFTSR:
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
         self.label_risidual = self.label - self.images
         self.pred = tf.squeeze(self.model())
+
+        self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
+
+        self.pred_risidual = self.label_risidual_fft - self.pred
+        # self.pred_risidual = tf.real(tf.ifft2d(self.pred_risidual))
         self.pred = tf.real(tf.ifft2d(self.pred))
-        self.pred_risidual = self.pred
-        # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
         # self.pred = tf.squeeze(self.model())
 
@@ -43,7 +46,7 @@ class FFTSR:
         # print('pred',self.pred)
 
         # loss_complex = self.label_risidual - self.pred
-        self.loss = tf.nn.l2_loss(self.label_risidual - self.pred_risidual)
+        self.loss = tf.nn.l2_loss(tf.real(tf.ifft2d(self.pred_risidual)))
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
@@ -237,7 +240,7 @@ class FFTSR:
         # print(w[:,:,:,0])
         # # imshow_spectrum(w)
         # #
-        result = self.pred_risidual.eval({self.images: lr_img,self.label:hr_img})
+        result = self.pred.eval({self.images: lr_img,self.label:hr_img})
         # result = np.squeeze(result)
         # result = result*255/(1e3*1e-5)
         # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
