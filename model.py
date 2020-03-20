@@ -124,8 +124,8 @@ class FFTSR:
         c_r = tf.nn.conv2d(c_r, w_smooth_real, strides=[1, stride, stride, 1], padding='SAME')
         c_i = tf.nn.conv2d(c_i, w_smooth_imag, strides=[1, stride, stride, 1], padding='SAME')
 
-        # c_r = tf.nn.bias_add(c_r, b)
-        # c_i = tf.nn.bias_add(c_i, b)
+        c_r = tf.nn.bias_add(c_r, b)
+        c_i = tf.nn.bias_add(c_i, b)
 
         c_r = tf.reduce_sum(c_r, reduction_indices=3)
         c_i = tf.reduce_sum(c_i, reduction_indices=3)
@@ -133,14 +133,14 @@ class FFTSR:
         c_r = tf.nn.relu(c_r)
         c_i = tf.nn.relu(c_i)
 
-        w_smooth = tf.cast(tf.complex(c_r, c_i), tf.complex64)
-        print(w_smooth)
-        print('w_smooth',w_smooth)
+        feature_map = tf.cast(tf.complex(c_r, c_i), tf.complex64)
+        print(feature_map)
+        print('feature_map',feature_map)
         print('c_r',c_r)
         print('c_i',c_i)
 
-        feature_map = w_smooth
-
+        w_smooth = tf.cast(tf.complex(w_smooth_real, w_smooth_imag), tf.complex64)
+        print(w_smooth)
         # conv = tf.real(tf.ifft2d(conv))
         # conv = tf.reduce_sum(conv, reduction_indices=1)  # batch, filters, height, width
         # conv = tf.transpose(conv, [0, 2, 3, 1])  # batch, height, width, filters
