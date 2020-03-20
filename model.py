@@ -29,16 +29,17 @@ class FFTSR:
         self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
         self.pred = tf.squeeze(self.model())
-        self.pred = self.label_risidual_fft - tf.ifft2d(self.pred)
-        self.pred = tf.real(self.pred)
+        self.loss_min = self.label_risidual_fft - tf.ifft2d(self.pred)
+        self.loss_min = tf.real(self.loss_min)
 
+        self.predict = tf.real(tf.ifft2d(self.pred))
         # self.predict =tf.real(tf.ifft2d(self.pred))
 
-        print('label_risidual',self.label_risidual)
+        print('label_risidual',self.loss_min)
         print('pred',self.pred)
 
         # loss_complex = self.label_risidual - self.pred
-        self.loss = tf.nn.l2_loss(self.pred)
+        self.loss = tf.nn.l2_loss(self.loss_min)
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
