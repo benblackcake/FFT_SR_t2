@@ -71,13 +71,14 @@ class FFTSR:
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
         f_ = self.f1+self.f2+self.f3+self.f4+self.f5+self.f6
-        add ,_ = self.fft_conv_pure(f_,filters=5,width=256,height=256,stride=1, name='conv6')
+        p_ = f_ *self.f6
+        i_ = p_+self.f1
         # f_=self
         # f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return add
+        return i_
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
@@ -236,9 +237,9 @@ class FFTSR:
         # print(w[:,:,:,0])
         # # imshow_spectrum(w)
         # #
-        result = self.pred_risidual.eval({self.images: lr_img,self.label:hr_img})
-        # result = np.squeeze(result)
-        result = result*255/(1e3*1e-5)
-        # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-        plt_imshow(((result)))
-        print(np.abs(result))
+            result = self.pred_risidual.eval({self.images: lr_img,self.label:hr_img})
+            # result = np.squeeze(result)
+            # result = result*255/(1e3*1e-5)
+            # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
+            plt_imshow(((result)))
+            print(np.abs(result))
