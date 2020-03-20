@@ -22,7 +22,7 @@ class FFTSR:
         # self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
         self.source_fft = tf.fft2d(tf.complex(self.images, 0.0 * self.images))
 
-        # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
         self.label_risidual = self.label - self.images
@@ -30,7 +30,7 @@ class FFTSR:
 
         self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
-        self.pred_risidual = self.label - self.pred
+        self.pred_risidual = self.label_fft - self.pred
         # self.pred_risidual = tf.real(tf.ifft2d(self.pred_risidual))
         self.pred = tf.real(tf.ifft2d(self.pred))
 
