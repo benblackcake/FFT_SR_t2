@@ -28,9 +28,9 @@ class FFTSR:
         self.label_fft = self.label_fft - self.source_fft
 
         self.pred = self.model()
-        self.predict = tf.real(tf.ifft2d(self.pred))
+        self.predict =tf.abs(tf.ifft2d(self.pred))
         loss_complex = self.label_fft -  self.pred
-        self.loss = tf.nn.l2_loss(tf.real(tf.ifft2d(loss_complex)))
+        self.loss = tf.nn.l2_loss(tf.abs(tf.ifft2d(loss_complex)))
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
@@ -63,7 +63,7 @@ class FFTSR:
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return f_ * self.spectral_c4 +self.f6
+        return f_ * self.spectral_c6 +self.f6
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
