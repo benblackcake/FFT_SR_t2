@@ -8,8 +8,8 @@ from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
     img = 'images_train/butterfly.bmp'
-    img = cv2.imread(img)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.imread(img,cv2.COLOR_BGR2GRAY)
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB)
 
     print('img_shape ->',img.shape) #Y cr cb
 
@@ -23,9 +23,8 @@ if __name__ == '__main__':
         fftsr = FFTSR(sess, 1e-4, 15000)
 
         # fftsr.build_model()
-        # fftsr.run(hr_img[:,:,0],lr_img[:,:,0])
         fftsr.run(hr_img,lr_img)
-
+        # fftsr.run(hr_img[:,:,0],lr_img[:,:,0])
 
         # out = fftsr.pred
         # print(out)
