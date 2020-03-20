@@ -26,17 +26,19 @@ class FFTSR:
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
         self.label_risidual = self.label - self.images
+        self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
+        self.pred = tf.squeeze(self.model())
+        self.pred = self.label_risidual_fft - tf.ifft2d(self.pred)
+        self.pred = tf.real(self.pred)
 
-        self.pred = tf.real(tf.ifft2d(self.model()))
-        self.pred = tf.squeeze(self.pred)
         # self.predict =tf.real(tf.ifft2d(self.pred))
 
         print('label_risidual',self.label_risidual)
         print('pred',self.pred)
 
-        loss_complex = self.label_risidual - self.pred
-        self.loss = tf.nn.l2_loss(loss_complex)
+        # loss_complex = self.label_risidual - self.pred
+        self.loss = tf.nn.l2_loss(self.pred)
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
@@ -230,7 +232,7 @@ class FFTSR:
         # #
         result = self.pred.eval({self.images: lr_img})
         # result = np.squeeze(result)
-        result = result*255/(1e3*1e-5)
+        # result = result*255/(1e3*1e-5)
         # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
         plt_imshow((result))
         print(result)
