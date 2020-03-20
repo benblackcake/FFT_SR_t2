@@ -81,7 +81,7 @@ class FFTSR:
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return f_
+        return p_
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
@@ -240,9 +240,9 @@ class FFTSR:
         # print(w[:,:,:,0])
         # # imshow_spectrum(w)
         # #
-        result = self.pred.eval({self.images: lr_img,self.label:hr_img})
-        # result = np.squeeze(result)
-        # result = result*255/(1e3*1e-5)
-        # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-        plt_imshow(((result)))
-        print(np.abs(result))
+            result = self.pred.eval({self.images: lr_img,self.label:hr_img})
+            result = np.squeeze(result)
+            # result = result*255/(1e3*1e-5)
+            # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
+            plt_imshow(((result)))
+            print(np.abs(result))
