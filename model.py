@@ -232,5 +232,5 @@ class FFTSR:
         result = np.squeeze(result)
         result = result*255/(1e3*1e-5)
         # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-        plt_imshow(result)
+        plt_imshow(np.squeeze(np.abs(result)))
         print(result)
