@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
     img = 'images_train/butterfly.bmp'
-    img = cv2.imread(img,cv2.COLOR_BGR2GRAY)
+    img = cv2.imread(img,cv2.IMREAD_GRAYSCALE)
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB)
 
     print('img_shape ->',img.shape) #Y cr cb
