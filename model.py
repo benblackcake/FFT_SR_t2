@@ -20,7 +20,12 @@ class FFTSR:
         self.label = tf.placeholder(tf.float32, [256, 256], name='HR_img')
 
         self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
+        self.source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
+
         self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+
+        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+        self.label_fft = self.label_fft - self.source_fft
 
         self.pred = self.model()
         self.predict = tf.real(tf.ifft2d(self.pred))
@@ -35,7 +40,6 @@ class FFTSR:
 
     def model(self):
         # x = None
-        self.source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
         # print('source_fft',source_fft)
         self.f1,self.spectral_c1 = self.fft_conv_pure(self.source_fft,filters=5,width=256,height=256,stride=1, name='conv1')
         # f1_smooth,self.spatial_s1,self.spectral_s1 = self.fft_conv(self.spectral_c1,filters=5,width=5,height=5,stride=1, name='f1_smooth')
