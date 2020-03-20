@@ -19,7 +19,7 @@ class FFTSR:
         self.images = tf.placeholder(tf.float32, [256, 256], name='input_img')
         self.label = tf.placeholder(tf.float32, [256, 256], name='HR_img')
 
-        self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])- .5
+        self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
 
         self.pred = self.model()
         self.loss = tf.nn.l2_loss(self.label - self.pred)
@@ -38,6 +38,8 @@ class FFTSR:
         # f1_smooth,self.spatial_s1,self.spectral_s1 = self.fft_conv(self.spectral_c1,filters=5,width=5,height=5,stride=1, name='f1_smooth')
 
         self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
+        self.f3,self.spectral_c3 = self.fft_conv_pure(self.f2,filters=5,width=256,height=256,stride=1, name='conv2')
+        self.f4,self.spectral_c4 = self.fft_conv_pure(self.f3,filters=5,width=256,height=256,stride=1, name='conv2')
         # self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
         # self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
 
@@ -45,10 +47,11 @@ class FFTSR:
 
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
-        f_ = self.f1+self.f2
+        f_ = self.f1+self.f2+self.f3+self.f4
+        # f_=self
         f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
-        # print('__debug__spatial_c1',self.spectral_c1)
+        print('__debug__spatial_c1',self.spectral_c1)
 
         return f_
     #
@@ -140,7 +143,9 @@ class FFTSR:
         # conv = tf.transpose(conv, [0, 2, 3, 1])  # batch, height, width, filters
         #
         # # Drop the batch dimension to keep things consistent with the other conv_op functions
-        # w = tf.squeeze(w, [0])  # channels, filters, height, width
+        w = tf.squeeze(w, [0])  # channels, filters, height, width
+        w = tf.reduce_sum(w, reduction_indices=1)
+
         #
         # # Compute a spatial encoding of the filter for visualization
         # spatial_filter = tf.ifft2d(w)
@@ -196,11 +201,14 @@ class FFTSR:
 
 
         print(x)
-        w = self.sess.run([self.source_fft],feed_dict={self.images: lr_img, self.label:hr_img})
-        w =np.squeeze(w)
-        w = w /(1e3*1e-5)
+        w = self.sess.run([self.spectral_c1],feed_dict={self.images: lr_img, self.label:hr_img})
+        w = np.asarray(w)
+        # w =np.squeeze(w)
+        # w = w /(1e3*1e-5)
         print(w)
-        imshow_spectrum(w)
+        print('----')
+        print(w[:,:,:,0])
+        # imshow_spectrum(w)
         #
         result = self.pred.eval({self.images: lr_img})
         result = np.squeeze(result)
