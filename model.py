@@ -45,8 +45,11 @@ class FFTSR:
         # f1_smooth,self.spatial_s1,self.spectral_s1 = self.fft_conv(self.spectral_c1,filters=5,width=5,height=5,stride=1, name='f1_smooth')
 
         self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
-        self.f3,self.spectral_c3 = self.fft_conv_pure(self.f2,filters=5,width=256,height=256,stride=1, name='conv2')
-        self.f4,self.spectral_c4 = self.fft_conv_pure(self.f3,filters=5,width=256,height=256,stride=1, name='conv2')
+        self.f3,self.spectral_c3 = self.fft_conv_pure(self.f2,filters=5,width=256,height=256,stride=1, name='conv3')
+        self.f4,self.spectral_c4 = self.fft_conv_pure(self.f3,filters=5,width=256,height=256,stride=1, name='conv4')
+        self.f5,self.spectral_c5 = self.fft_conv_pure(self.f3,filters=5,width=256,height=256,stride=1, name='conv5')
+        self.f6,self.spectral_c6 = self.fft_conv_pure(self.f3,filters=5,width=256,height=256,stride=1, name='conv6')
+
         # self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
         # self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
 
@@ -54,13 +57,13 @@ class FFTSR:
 
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
-        f_ = self.f1+self.f2+self.f3+self.f4
+        f_ = self.f1+self.f2+self.f3+self.f4+self.f5+self.f6
         # f_=self
         # f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return f_ * self.spectral_c4 +self.f1
+        return f_ * self.spectral_c4 +self.f6
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
