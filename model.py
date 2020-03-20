@@ -81,7 +81,7 @@ class FFTSR:
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return p_
+        return f_
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
