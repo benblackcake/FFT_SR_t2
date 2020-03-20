@@ -43,7 +43,7 @@ class FFTSR:
         # print('pred',self.pred)
 
         # loss_complex = self.label_risidual - self.pred
-        self.loss = tf.nn.l2_loss(self.label_risidual - self.pred_risidual)
+        self.loss = tf.nn.l2_loss(self.label - self.pred_risidual)
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
