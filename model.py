@@ -20,17 +20,17 @@ class FFTSR:
         self.label = tf.placeholder(tf.float32, [256, 256], name='HR_img')
 
         self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
-        self.source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
+        self.source_fft = tf.fft2d(self.image_matrix)
 
-        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+        self.label_fft = tf.fft2d(self.label)
 
-        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+        # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
         self.label_fft = self.label_fft - self.source_fft
 
         self.pred = self.model()
-        self.predict =tf.abs(tf.ifft2d(self.pred))
+        self.predict =tf.real(tf.ifft2d(self.pred))
         loss_complex = self.label_fft -  self.pred
-        self.loss = tf.nn.l2_loss(tf.abs(tf.ifft2d(loss_complex)))
+        self.loss = tf.nn.l2_loss(tf.real(tf.ifft2d(loss_complex)))
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
