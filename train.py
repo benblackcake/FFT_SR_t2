@@ -17,8 +17,8 @@ if __name__ == '__main__':
 
     # img = img.reshape([1,256,256,1])
     with tf.Session() as sess:
-        hr_img = (img)/255.0
-        lr_img = (up_sample(bicubic(img)))/255.0
+        hr_img = (img)/255.0 *(1e3*1e-5)
+        lr_img = (up_sample(bicubic(img)))/255.0 *(1e3*1e-5)
         # imshow_spectrum(lr_img)
         fftsr = FFTSR(sess, 1e-4, 15000)
 

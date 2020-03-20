@@ -20,9 +20,12 @@ class FFTSR:
         self.label = tf.placeholder(tf.float32, [256, 256], name='HR_img')
 
         self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
+        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
 
         self.pred = self.model()
-        self.loss = tf.nn.l2_loss(self.label - self.pred)
+
+        loss_complex = self.label_fft -  self.pred
+        self.loss = tf.nn.l2_loss(tf.real(tf.ifft2d(loss_complex)))
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
@@ -49,7 +52,7 @@ class FFTSR:
         print('f1',self.f1)
         f_ = self.f1+self.f2+self.f3+self.f4
         # f_=self
-        f_ = tf.real(tf.ifft2d(f_))
+        # f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
@@ -212,7 +215,7 @@ class FFTSR:
         #
         result = self.pred.eval({self.images: lr_img})
         result = np.squeeze(result)
-        result = result*255
+        result = result*255/(1e3*1e-5)
         result = np.clip(result, 0.0, 255.0).astype(np.uint8)
         imshow(result)
         print(result)
