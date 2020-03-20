@@ -212,7 +212,7 @@ class FFTSR:
         #
         result = self.pred.eval({self.images: lr_img})
         result = np.squeeze(result)
-        result = result*255/(1e3*1e-5)
+        result = result*255
         result = np.clip(result, 0.0, 255.0).astype(np.uint8)
         imshow(result)
         print(result)
