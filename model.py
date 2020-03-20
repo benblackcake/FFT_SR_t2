@@ -28,7 +28,7 @@ class FFTSR:
         self.label_risidual = self.label - self.images
         self.pred = tf.squeeze(self.model())
         self.pred = tf.real(tf.ifft2d(self.pred))
-        self.pred_risidual = self.images - self.pred
+        self.pred_risidual = self.label - self.pred
         # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
         # self.pred = tf.squeeze(self.model())
