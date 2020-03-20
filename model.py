@@ -20,9 +20,9 @@ class FFTSR:
         self.label = tf.placeholder(tf.float32, [256, 256], name='HR_img')
 
         self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
-        self.source_fft = tf.fft2d(self.image_matrix)
+        self.source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
 
-        self.label_fft = tf.fft2d(self.label)
+        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
         self.label_fft = self.label_fft - self.source_fft
