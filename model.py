@@ -75,13 +75,13 @@ class FFTSR:
         print('f1',self.f1)
         f_ = self.f1#+self.f2+self.f3+self.f4+self.f5+self.f6
         p_ = f_ *self.f1
-        i_ = p_+self.f1
+        # i_ = p_+self.f1
         # f_=self
         # f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return i_
+        return p_
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
