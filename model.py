@@ -200,7 +200,7 @@ class FFTSR:
             _,x = self.sess.run([self.train_op,self.loss],feed_dict={self.images: lr_img, self.label:hr_img})
 
 
-        print(x)
+            print(x)
         w = self.sess.run([self.spectral_c1],feed_dict={self.images: lr_img, self.label:hr_img})
         w = np.asarray(w)
         # w =np.squeeze(w)
