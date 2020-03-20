@@ -29,6 +29,11 @@ def imshow(img):
     cv2.imshow('test',img)
     cv2.waitKey(0)
 
+def plt_imshow(img):
+    # magnitude_spectrum = 20 * np.log(np.abs(img))
+    plt.imshow(img, cmap='gray')
+    plt.show()
+
 def imshow_spectrum(fftimg):
     magnitude_spectrum = 20 * np.log(np.abs(fftimg))
     plt.imshow(magnitude_spectrum, cmap='gray')

@@ -3,7 +3,7 @@
 import tensorflow as tf
 from utils import fft,L2_loss
 import numpy as np
-from utils import imshow,imshow_spectrum
+from utils import imshow,imshow_spectrum,plt_imshow
 
 class FFTSR:
 
@@ -19,18 +19,24 @@ class FFTSR:
         self.images = tf.placeholder(tf.float32, [256, 256], name='input_img')
         self.label = tf.placeholder(tf.float32, [256, 256], name='HR_img')
 
-        self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
-        self.source_fft = tf.fft2d(tf.complex(self.image_matrix, 0.0 * self.image_matrix))
-
-        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+        # self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
+        self.source_fft = tf.fft2d(tf.complex(self.images, 0.0 * self.images))
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
-        self.label_fft = self.label_fft - self.source_fft
 
-        self.pred = self.model()
-        self.predict =tf.real(tf.ifft2d(self.pred))
-        loss_complex = self.label_fft -  self.pred
-        self.loss = tf.nn.l2_loss(tf.real(tf.ifft2d(loss_complex)))
+        # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+        self.label_risidual = self.label - self.images
+
+
+        self.pred = tf.real(tf.ifft2d(self.model()))
+        self.pred = tf.squeeze(self.pred)
+        # self.predict =tf.real(tf.ifft2d(self.pred))
+
+        print('label_risidual',self.label_risidual)
+        print('pred',self.pred)
+
+        loss_complex = self.label_risidual - self.pred
+        self.loss = tf.nn.l2_loss(loss_complex)
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
@@ -208,21 +214,23 @@ class FFTSR:
         for er in range(self.epoch):
             # image = tf.reshape(image,[image.shape[0],image.shape[1]])
             _,x = self.sess.run([self.train_op,self.loss],feed_dict={self.images: lr_img, self.label:hr_img})
-
+            # _residual = self.sess.run([self.label_risidual],feed_dict={self.images: lr_img, self.label:hr_img})
+            # print(np.abs(_residual))
+            # plt_imshow(np.squeeze(np.abs(_residual)))
 
             print(x)
-        w = self.sess.run([self.spectral_c1],feed_dict={self.images: lr_img, self.label:hr_img})
-        w = np.asarray(w)
-        # w =np.squeeze(w)
-        # w = w /(1e3*1e-5)
-        print(w)
-        print('----')
-        print(w[:,:,:,0])
-        # imshow_spectrum(w)
-        #
-        result = self.predict.eval({self.images: lr_img})
-        result = np.squeeze(result)
-        result = result*255/(1e3*1e-5)
-        result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-        imshow(result)
-        print(result)
+        # w = self.sess.run([self.spectral_c1],feed_dict={self.images: lr_img, self.label:hr_img})
+        # w = np.asarray(w)
+        # # w =np.squeeze(w)
+        # # w = w /(1e3*1e-5)
+        # print(w)
+        # print('----')
+        # print(w[:,:,:,0])
+        # # imshow_spectrum(w)
+        # #
+        # result = self.predict.eval({self.images: lr_img})
+        # result = np.squeeze(result)
+        # result = result*255/(1e3*1e-5)
+        # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
+        # imshow(result)
+        # print(result)
