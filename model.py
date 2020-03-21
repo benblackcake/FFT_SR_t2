@@ -76,7 +76,7 @@ class FFTSR:
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
         f_ = self.f1+self.f2+self.f3+self.f4+self.f5+self.f6
-        p_ = f_ *self.spectral_c6
+        p_ = f_ *self.f1
         # i_ = p_+self.f1
         # f_=self
         # f_ = tf.real(tf.ifft2d(f_))
