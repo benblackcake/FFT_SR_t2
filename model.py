@@ -21,8 +21,10 @@ class FFTSR:
 
         # self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
         self.source_fft = tf.fft2d(tf.complex(self.images, 0.0 * self.images))
-
         self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+
+        # self.source_fft = tf.signal.rfft2d(self.images,fft_length=[tf.shape(self.images)[0],tf.shape(self.images)[1]])
+        # self.label_fft = tf.signal.rfft2d(self.label)
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
         self.label_risidual = self.label_fft - self.source_fft
@@ -30,9 +32,9 @@ class FFTSR:
 
         # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
-        self.pred_risidual = self.label_risidual - (self.label_fft- self.pred)
+        self.pred_risidual = self.label_risidual - self.pred
         # self.pred_risidual = tf.real(tf.ifft2d(self.pred_risidual))
-        self.pred = tf.real(tf.ifft2d(self.pred))
+        self.pred = tf.abs(tf.ifft2d(self.pred))
 
         # self.pred = tf.squeeze(self.model())
 
@@ -46,7 +48,7 @@ class FFTSR:
         # print('pred',self.pred)
 
         # loss_complex = self.label_risidual - self.pred
-        self.loss = tf.nn.l2_loss(tf.real(tf.ifft2d(self.pred_risidual)))
+        self.loss = tf.nn.l2_loss(tf.abs(tf.ifft2d(self.pred_risidual)))
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
@@ -74,14 +76,14 @@ class FFTSR:
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
         f_ = self.f1+self.f2+self.f3+self.f4+self.f5+self.f6
-        p_ = f_ *self.f1
+        # p_ = f_ *self.spectral_c6
         # i_ = p_+self.f1
         # f_=self
         # f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return p_
+        return self.f1
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
@@ -226,9 +228,14 @@ class FFTSR:
         for er in range(self.epoch):
             # image = tf.reshape(image,[image.shape[0],image.shape[1]])
             _,x = self.sess.run([self.train_op,self.loss],feed_dict={self.images: lr_img, self.label:hr_img})
-            # _residual = self.sess.run([self.label_risidual],feed_dict={self.images: lr_img, self.label:hr_img})
+            # source = self.sess.run([self.source_fft],feed_dict={self.images: lr_img, self.label:hr_img})
+            # imshow_spectrum(np.squeeze(source))
+
+            _residual = self.sess.run([self.label_risidual],feed_dict={self.images: lr_img, self.label:hr_img})
+            _r = tf.abs(tf.ifft2d(np.squeeze(_residual)))
+            # imshow_spectrum(np.squeeze(_residual))
             # print(np.abs(_residual))
-            # plt_imshow(np.squeeze(np.abs(_residual)))
+            plt_imshow(np.squeeze(self.sess.run(_r)))
 
             print(x)
         # w = self.sess.run([self.spectral_c1],feed_dict={self.images: lr_img, self.label:hr_img})
@@ -240,9 +247,9 @@ class FFTSR:
         # print(w[:,:,:,0])
         # # imshow_spectrum(w)
     # #
-        result = self.pred.eval({self.images: lr_img,self.label:hr_img})
-        result = np.squeeze(result)
-        # result = result*255/(1e3*1e-5)
-        # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-        plt_imshow(((result)))
-        print(np.abs(result))
+            result = self.pred.eval({self.images: lr_img,self.label:hr_img})
+            result = np.squeeze(result)
+            # result = result*255/(1e3*1e-5)
+            # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
+            plt_imshow(((result)))
+            print(np.abs(result))
