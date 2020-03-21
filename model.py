@@ -25,12 +25,12 @@ class FFTSR:
         self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
-        self.label_risidual = self.label - self.images
+        self.label_risidual = self.label_fft - self.source_fft
         self.pred = (self.model())
 
-        self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
+        # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
-        self.pred_risidual = self.label_fft - self.pred
+        self.pred_risidual = self.label_risidual - self.pred
         # self.pred_risidual = tf.real(tf.ifft2d(self.pred_risidual))
         self.pred = tf.real(tf.ifft2d(self.pred))
 
