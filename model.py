@@ -27,6 +27,7 @@ class FFTSR:
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
         self.label_risidual = self.images - self.label
+        # self.input_residual = self.images
         self.pred = (self.model())
 
         # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
@@ -61,8 +62,8 @@ class FFTSR:
 
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
-        # f_ = self.f1+self.f2+self.f3+self.f4+self.f5+self.f6
-        f_ = self.spectral_c1 +self.spectral_c2 +self.spectral_c3+self.spectral_c4 +self.spectral_c5+self.spectral_c6
+        # f_ = self.f1#+self.f2+self.f3+self.f4+self.f5+self.f6
+        f_ = self.spectral_c1# +self.spectral_c2 +self.spectral_c3+self.spectral_c4 +self.spectral_c5+self.spectral_c6
         # p_ = f_ *self.f6
         # i_ = p_+self.f1
         # f_=self
@@ -133,10 +134,11 @@ class FFTSR:
         conv = tf.reduce_sum(conv, reduction_indices=1)
         conv = tf.transpose(conv, [0, 2, 3, 1])
 
-        conv = tf.nn.conv2d(conv, w_smooth_spatial_filter, strides=[1, stride, stride, 1], padding='SAME')
+        # conv = tf.nn.conv2d(conv, w_smooth_spatial_filter, strides=[1, stride, stride, 1], padding='SAME')
         conv = tf.nn.bias_add(conv,b)
-        conv = tf.reduce_sum(conv, reduction_indices=3)
         conv = tf.nn.relu(conv)
+        conv = tf.reduce_sum(conv, reduction_indices=3)
+        ##
         # c_r = tf.real(conv)
         # c_i = tf.imag(conv)
         #
