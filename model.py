@@ -20,8 +20,7 @@ class FFTSR:
         self.label = tf.placeholder(tf.float32, [256, 256], name='HR_img')
 
         # self.image_matrix = tf.reshape(self.images, shape=[-1, 256, 256, 1])
-        self.source_fft = tf.fft2d(tf.complex(self.images, 0.0 * self.images))
-        self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
+        # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
 
         # self.source_fft = tf.signal.rfft2d(self.images,fft_length=[tf.shape(self.images)[0],tf.shape(self.images)[1]])
         # self.label_fft = tf.signal.rfft2d(self.label)
@@ -46,7 +45,7 @@ class FFTSR:
     def model(self):
         # x = None
         # print('source_fft',source_fft)
-        self.f1,self.spectral_c1 = self.fft_conv_pure(self.source_fft,filters=5,width=256,height=256,stride=1, name='conv1')
+        self.f1,self.spectral_c1 = self.fft_conv_pure(self.images,filters=5,width=256,height=256,stride=1, name='conv1')
         # f1_smooth,self.spatial_s1,self.spectral_s1 = self.fft_conv(self.spectral_c1,filters=5,width=5,height=5,stride=1, name='f1_smooth')
 
         self.f2,self.spectral_c2 = self.fft_conv_pure(self.f1,filters=5,width=256,height=256,stride=1, name='conv2')
@@ -64,7 +63,7 @@ class FFTSR:
         print('f1',self.f1)
         # f_ = self.f1+self.f2+self.f3+self.f4+self.f5+self.f6
         f_ = self.spectral_c1 +self.spectral_c2 +self.spectral_c3+self.spectral_c4 +self.spectral_c5+self.spectral_c6
-        p_ = f_ *self.f6
+        # p_ = f_ *self.f6
         # i_ = p_+self.f1
         # f_=self
         # f_ = tf.real(tf.ifft2d(f_))
@@ -91,20 +90,23 @@ class FFTSR:
 
             w_smooth_real = tf.Variable(init_smooth.real, dtype=tf.float32, name='real')
             w_smooth_imag = tf.Variable(init_smooth.imag, dtype=tf.float32, name='imag')
+            w_smooth = tf.cast(tf.complex(w_smooth_real, w_smooth_imag), tf.complex64)
+            w_smooth_spatial_filter = tf.ifft2d(w_smooth)
+            w_smooth_spatial_filter = tf.real(tf.transpose(w_smooth_spatial_filter, [2, 3, 0, 1]))
 
             b = tf.Variable(tf.constant(0.1, shape=[filters]))
 
         # Add batch as a dimension for later broadcasting
         w = tf.expand_dims(w, 0)  # batch, channels, filters, height, width
-        w_smooth_real = tf.transpose(w_smooth_real, [2, 3, 0, 1])
-        w_smooth_imag = tf.transpose(w_smooth_imag, [2, 3, 0, 1]) #(5,5,1,5)
+        # w_smooth_real = tf.transpose(w_smooth_real, [2, 3, 0, 1])
+        # w_smooth_imag = tf.transpose(w_smooth_imag, [2, 3, 0, 1]) #(5,5,1,5)
 
         # Prepare the source tensor for FFT (1,256,256,1)
         source = tf.transpose(source, [0, 3, 1, 2])  # batch, channel, height, width (1,1,256,256)
-        # source_fft = tf.fft2d(tf.complex(source, 0.0 * source))
+        source_fft = tf.fft2d(tf.complex(source, 0.0 * source))
 
         # Prepare the FFTd input tensor for element-wise multiplication with filter
-        source_fft = tf.expand_dims(source, 2)  # batch, channels, filters, height, width
+        source_fft = tf.expand_dims(source_fft, 2)  # batch, channels, filters, height, width
         source_fft = tf.tile(source_fft, [1, 1, filters, 1, 1]) # (1,1,5,256,256)
 
         # Shift, then pad the filter for element-wise multiplication, then unshift
@@ -122,39 +124,47 @@ class FFTSR:
 
         # Convolve with the filter in spectral domain
         conv = source_fft * tf.conj(w_padded) # (1,1,5,256,256)
-        print(conv)
+        print('Mul_conv',conv)
 
         # Sum out the channel dimension, and prepare for bias_add (1,5,256,256)
         # Note: The decision to sum out the channel dimension seems intuitive, but
         #	   not necessarily theoretically sound.
-        c_r = tf.real(conv)
-        c_i = tf.imag(conv)
+        conv = tf.real(tf.ifft2d(conv))
+        conv =  tf.reduce_sum(conv, reduction_indices=1)
+        conv = tf.transpose(conv, [0, 2, 3, 1])
 
-        c_r = tf.reduce_sum(c_r, reduction_indices=1)  # batch, filters, height, width (1,5,256,256)
-        c_i = tf.reduce_sum(c_i, reduction_indices=1)  # batch, filters, height, width (1,5,256,256)
+        conv = tf.nn.conv2d(conv, w_smooth_spatial_filter, strides=[1, stride, stride, 1], padding='SAME')
+        conv = tf.nn.bias_add(conv,b)
+        conv = tf.reduce_sum(conv, reduction_indices=3)
+        conv = tf.nn.relu(conv)
+        # c_r = tf.real(conv)
+        # c_i = tf.imag(conv)
+        #
+        # c_r = tf.reduce_sum(c_r, reduction_indices=1)  # batch, filters, height, width (1,5,256,256)
+        # c_i = tf.reduce_sum(c_i, reduction_indices=1)  # batch, filters, height, width (1,5,256,256)
+        #
+        # c_r = tf.transpose(c_r, [0, 2, 3, 1]) # (1,256,256,5)
+        # c_i = tf.transpose(c_i, [0, 2, 3, 1])
+        # print('w_smooth_real',w_smooth_real)
+        # c_r = tf.nn.conv2d(c_r, w_smooth_real, strides=[1, stride, stride, 1], padding='SAME')
+        # c_i = tf.nn.conv2d(c_i, w_smooth_imag, strides=[1, stride, stride, 1], padding='SAME')
+        #
+        # c_r = tf.nn.bias_add(c_r, b)
+        # c_i = tf.nn.bias_add(c_i, b)
+        #
+        # c_r = tf.reduce_sum(c_r, reduction_indices=3)
+        # c_i = tf.reduce_sum(c_i, reduction_indices=3)
+        #
+        # c_r = tf.nn.relu(c_r)
+        # c_i = tf.nn.relu(c_i)
 
-        c_r = tf.transpose(c_r, [0, 2, 3, 1]) # (1,256,256,5)
-        c_i = tf.transpose(c_i, [0, 2, 3, 1])
-        print('w_smooth_real',w_smooth_real)
-        c_r = tf.nn.conv2d(c_r, w_smooth_real, strides=[1, stride, stride, 1], padding='SAME')
-        c_i = tf.nn.conv2d(c_i, w_smooth_imag, strides=[1, stride, stride, 1], padding='SAME')
-
-        c_r = tf.nn.bias_add(c_r, b)
-        c_i = tf.nn.bias_add(c_i, b)
-
-        c_r = tf.reduce_sum(c_r, reduction_indices=3)
-        c_i = tf.reduce_sum(c_i, reduction_indices=3)
-
-        c_r = tf.nn.relu(c_r)
-        c_i = tf.nn.relu(c_i)
-
-        feature_map = tf.cast(tf.complex(c_r, c_i), tf.complex64)
+        feature_map = conv
         print(feature_map)
         print('feature_map',feature_map)
-        print('c_r',c_r)
-        print('c_i',c_i)
+        # print('c_r',c_r)
+        # print('c_i',c_i)
 
-        w_smooth = tf.cast(tf.complex(w_smooth_real, w_smooth_imag), tf.complex64)
+        # w_smooth = tf.cast(tf.complex(w_smooth_real, w_smooth_imag), tf.complex64)
         print(w_smooth)
         # conv = tf.real(tf.ifft2d(conv))
         # conv = tf.reduce_sum(conv, reduction_indices=1)  # batch, filters, height, width
