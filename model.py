@@ -26,7 +26,7 @@ class FFTSR:
         # self.label_fft = tf.signal.rfft2d(self.label)
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
-        self.label_risidual = self.images - self.label
+        self.label_risidual = self.label - self.images
         # self.input_residual = self.images
         self.pred = (self.model())
 
