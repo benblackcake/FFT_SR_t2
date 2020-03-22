@@ -111,20 +111,20 @@ class FFTSR:
         source_fft = tf.tile(source_fft, [1, 1, filters, 1, 1]) # (1,1,5,256,256)
 
         # Shift, then pad the filter for element-wise multiplication, then unshift
-        w_shifted = self.batch_fftshift2d(w)
-        height_pad = (input_height - height) // 2
-        width_pad = (input_width - width) // 2
-
-        # Pads with zeros
-        w_padded = tf.pad(
-            w_shifted,
-            [[0, 0], [0, 0], [0, 0], [height_pad, height_pad], [width_pad, width_pad]],
-            mode='CONSTANT'
-        )
-        w_padded = self.batch_ifftshift2d(w_padded)
+        # w_shifted = self.batch_fftshift2d(w)
+        # height_pad = (input_height - height) // 2
+        # width_pad = (input_width - width) // 2
+        #
+        # # Pads with zeros
+        # w_padded = tf.pad(
+        #     w_shifted,
+        #     [[0, 0], [0, 0], [0, 0], [height_pad, height_pad], [width_pad, width_pad]],
+        #     mode='CONSTANT'
+        # )
+        # w_padded = self.batch_ifftshift2d(w_padded)
 
         # Convolve with the filter in spectral domain
-        conv = source_fft * tf.conj(w_padded) # (1,1,5,256,256)
+        conv = source_fft * tf.conj(w) # (1,1,5,256,256)
         print('Mul_conv',conv)
 
         # Sum out the channel dimension, and prepare for bias_add (1,5,256,256)
