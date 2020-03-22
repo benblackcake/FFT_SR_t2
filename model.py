@@ -32,7 +32,7 @@ class FFTSR:
 
         # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
-        self.pred_risidual = self.label_risidual - tf.abs(tf.ifft2d(self.pred))
+        self.pred_risidual = self.label_risidual - tf.real(tf.ifft2d(self.pred))
 
         # loss_complex = self.label_risidual - self.pred
         self.loss = tf.nn.l2_loss(self.pred_risidual)
@@ -236,7 +236,7 @@ class FFTSR:
         # # imshow_spectrum(w)
     # #
         result = self.pred.eval({self.images: lr_img,self.label:hr_img})
-        result = np.squeeze(self.sess.run(tf.abs(tf.ifft2d(result))))
+        result = np.squeeze(self.sess.run(tf.real(tf.ifft2d(result))))
         # result = result*255/(1e3*1e-5)
         # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
         plt_imshow(((result)))
