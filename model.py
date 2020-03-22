@@ -31,7 +31,7 @@ class FFTSR:
 
         # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
-        self.pred_risidual = self.label_risidual - tf.real(tf.ifft2d(self.pred))
+        self.pred_risidual = self.label_risidual -self.pred
 
         # loss_complex = self.label_risidual - self.pred
         self.loss = tf.nn.l2_loss(self.pred_risidual)
@@ -66,7 +66,7 @@ class FFTSR:
         # p_ = f_ *self.f6
         # i_ = p_+self.f1
         # f_=self
-        # f_ = tf.real(tf.ifft2d(f_))
+        f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
@@ -130,7 +130,7 @@ class FFTSR:
         # Note: The decision to sum out the channel dimension seems intuitive, but
         #	   not necessarily theoretically sound.
         conv = tf.real(tf.ifft2d(conv))
-        conv =  tf.reduce_sum(conv, reduction_indices=1)
+        conv = tf.reduce_sum(conv, reduction_indices=1)
         conv = tf.transpose(conv, [0, 2, 3, 1])
 
         conv = tf.nn.conv2d(conv, w_smooth_spatial_filter, strides=[1, stride, stride, 1], padding='SAME')
