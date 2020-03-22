@@ -27,28 +27,15 @@ class FFTSR:
         # self.label_fft = tf.signal.rfft2d(self.label)
 
         # self.label_fft = tf.fft2d(tf.complex(self.label, 0.0 * self.label))
-        self.label_risidual = self.label_fft - self.source_fft
+        self.label_risidual = self.images - self.label
         self.pred = (self.model())
 
         # self.label_risidual_fft = tf.complex(self.label_risidual, 0.0 * self.label_risidual) #self.label - self.images
 
-        self.pred_risidual = self.label_risidual - self.pred
-        # self.pred_risidual = tf.real(tf.ifft2d(self.pred_risidual))
-        # self.pred = tf.abs(tf.ifft2d(self.pred))
-
-        # self.pred = tf.squeeze(self.model())
-
-        # self.loss_min = self.label_risidual_fft - tf.ifft2d(self.pred)
-        # self.loss_min = tf.real(self.loss_min)
-
-        # self.predict = tf.real(tf.ifft2d(self.pred))
-        # self.predict =tf.real(tf.ifft2d(self.pred))
-
-        # print('label_risidual',self.loss_min)
-        # print('pred',self.pred)
+        self.pred_risidual = self.label_risidual - tf.abs(tf.ifft2d(self.pred))
 
         # loss_complex = self.label_risidual - self.pred
-        self.loss = tf.nn.l2_loss(tf.abs(tf.ifft2d(self.pred_risidual)))
+        self.loss = tf.nn.l2_loss(self.pred_risidual)
         # squared_deltas = tf.square(self.label - self.pred)
         # self.loss = L2_loss(self.label, self.pred)
         # print(self.pred)
@@ -76,14 +63,14 @@ class FFTSR:
         # f1_smooth,_,_ = self.fft_conv(f1,filters=5,width=5,height=5,stride=1,name='f1_smooth')
         print('f1',self.f1)
         f_ = self.f1+self.f2+self.f3+self.f4+self.f5+self.f6
-        p_ = f_ *self.f1
+        p_ = f_ *self.f6
         # i_ = p_+self.f1
         # f_=self
         # f_ = tf.real(tf.ifft2d(f_))
         print('f_',f_)
         print('__debug__spatial_c1',self.spectral_c1)
 
-        return p_
+        return f_
     #
 
     def fft_conv_pure(self, source, filters, width, height, stride, activation='relu', name='fft_conv'):
@@ -247,9 +234,9 @@ class FFTSR:
         # print(w[:,:,:,0])
         # # imshow_spectrum(w)
     # #
-        result = self.pred.eval({self.images: lr_img,self.label:hr_img})
-        result = np.squeeze(self.sess.run(tf.abs(tf.ifft2d(result))))
-        # result = result*255/(1e3*1e-5)
-        # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-        plt_imshow(((result)))
-        print(np.abs(result))
+            result = self.pred.eval({self.images: lr_img,self.label:hr_img})
+            result = np.squeeze(self.sess.run(tf.abs(tf.ifft2d(result))))
+            # result = result*255/(1e3*1e-5)
+            # result = np.clip(result, 0.0, 255.0).astype(np.uint8)
+            plt_imshow(((result)))
+            print(np.abs(result))
